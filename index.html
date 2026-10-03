@@ -44,7 +44,7 @@
 
 <div class="container">
   <div class="card">
-    <h2 style="margin-top:0;">🏕️ Patrol Campout Menu & Live Walmart Budgeter</h2>
+    <h2 style="margin-top:0;">🏕️️ Patrol Campout Menu & Live Walmart Budgeter</h2>
     <div class="grid">
       <div>
         <label>Patrol Name</label>
@@ -52,7 +52,7 @@
       </div>
       <div>
         <label>Attending Scouts</label>
-        <input type="number" id="scoutCount" min="1" max="15" value="6" oninput="updateBudgetSummary()">
+        <input type="number" id="scoutCount" min="1" max="25" value="6" oninput="updateBudgetSummary()">
       </div>
     </div>
   </div>
@@ -72,19 +72,21 @@
     </div>
   </div>
 
-  <!-- Mandatory Meals -->
+  <!-- Mandatory Meals Container -->
   <div id="mealsContainer"></div>
 
-  <!-- Export -->
+  <!-- Google Doc Export -->
   <div class="card" style="text-align: center;">
     <button style="padding: 0.8rem 2rem; font-size: 1.05rem;" onclick="exportToGoogleDoc()">📋 Export Roster & Shopping List to Google Doc</button>
   </div>
 </div>
 
 <script>
-  // Cloudflare Worker Proxy & Google Apps Script URLs
-  const PROXY_URL = "https://ancient-block-da34.francescosnyder126-539.workers.dev";
-  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzJ8CV-I9wlktgIWQDc1oKXrb8MBG02T8ZpTtma7I8b3sLrTvwFpvvK9PGG5o8c6dj0/exec";
+  // ==============================================================
+  // CONFIGURATION: Replace these with your actual endpoints
+  // ==============================================================
+  const PROXY_URL = "https://ancient-block-da34.snyman1.workers.dev";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
   const REQUIRED_MEALS = [
     { id: "fri_cb", name: "Friday Cracker Barrel" },
@@ -104,9 +106,9 @@
     sun_bk: { dish: "Instant Oatmeal & Fruit", ingredients: [] }
   };
 
-  // Clean clutter from Walmart titles (SEO keywords, certifications, packaging variations)
+  // Strip excessive SEO marketing and clutter from Walmart item titles
   function cleanItemTitle(rawTitle) {
-    let t = rawTitle;
+    let t = rawTitle || "";
     t = t.replace(/\((.*?packaging may vary.*?\vert{}.*?pack.*?)\)/gi, "");
     t = t.replace(/,(?:\s*(?:Non-GMO|Gluten-Free|Certified Kosher|USDA Organic|All Natural)[^,]*)+/gi, "");
     t = t.replace(/\b(?:Non-GMO Project Verified|Certified Kosher|Gluten-Free)\b/gi, "");
@@ -115,17 +117,16 @@
     return t;
   }
 
-  // Calculate required package count based on attending scouts
+  // Calculate required package count dynamically based on scout headcount
   function estimateQuantityForScouts(title, scoutCount) {
-    const lower = title.toLowerCase();
+    const lower = (title || "").toLowerCase();
     const count = parseInt(scoutCount, 10) || 6;
 
-    // Detect ounce weights (e.g., 15 oz, 32 oz, 2 lb)
     const ozMatch = lower.match(/(\d+(?:\.\d+)?)\s*oz/);
     const lbMatch = lower.match(/(\d+(?:\.\d+)?)\s*lb/);
     let totalOz = ozMatch ? parseFloat(ozMatch[1]) : (lbMatch ? parseFloat(lbMatch[1]) * 16 : null);
 
-    // 1. Pancake mixes: standard serving is ~2-3 oz of dry mix per scout
+    // 1. Pancake Mix (~2.5 oz dry mix per scout)
     if (lower.includes("pancake") || lower.includes("waffle")) {
       if (totalOz) {
         const servingsPerBox = Math.max(1, Math.floor(totalOz / 2.5));
@@ -134,23 +135,22 @@
       return count > 7 ? 2 : 1;
     }
 
-    // 2. Meat / Ground Beef / Poultry (~0.33 to 0.5 lb / 6 oz per scout)
+    // 2. Meat / Ground Beef / Poultry (~6 oz / 0.38 lb per scout)
     if (lower.includes("beef") || lower.includes("chicken") || lower.includes("pork") || lower.includes("meat")) {
       if (totalOz) {
-        const requiredOz = count * 6;
-        return Math.max(1, Math.ceil(requiredOz / totalOz));
+        return Math.max(1, Math.ceil((count * 6) / totalOz));
       }
       return Math.max(1, Math.ceil(count / 3));
     }
 
-    // 3. Hot Dogs & Buns (8 per standard pack)
+    // 3. Hot Dogs & Buns (8 pack standard: 2 per scout)
     if (lower.includes("hot dog") || lower.includes("frank") || lower.includes("bun")) {
-      return Math.max(1, Math.ceil((count * 2) / 8)); // 2 per scout
+      return Math.max(1, Math.ceil((count * 2) / 8));
     }
 
-    // 4. Bread loaves (approx 20-22 usable sandwich slices = 10 sandwiches per loaf)
+    // 4. Sandwich Bread (~20 slices per loaf = 10 sandwiches)
     if (lower.includes("bread") && !lower.includes("cornbread")) {
-      return Math.max(1, Math.ceil((count * 2) / 10)); // 2 sandwiches per scout
+      return Math.max(1, Math.ceil((count * 2) / 10));
     }
 
     // 5. Eggs (12-pack: 2 eggs per scout)
@@ -163,7 +163,6 @@
       return Math.max(1, Math.ceil(count / 3));
     }
 
-    // Default for seasonings, butter, syrup, or snacks: 1 pack covers a standard patrol
     return 1;
   }
 
@@ -217,6 +216,7 @@
     updateBudgetSummary();
   }
 
+  // Call Cloudflare Worker AI Endpoint with direct error feedback
   async function aiSuggestIngredients(mealId) {
     const dish = document.getElementById(`dish_${mealId}`).value.trim();
     const box = document.getElementById(`ai_suggestions_${mealId}`);
@@ -226,19 +226,30 @@
     box.innerHTML = `<em>Generating recommended staples for "${dish}"...</em>`;
 
     try {
-      const res = await fetch(`${PROXY_URL}/ai-recipe?dish=${encodeURIComponent(dish)}`);
+      const cleanProxy = PROXY_URL.replace(/\/+$/, "");
+      const res = await fetch(`${cleanProxy}/ai-recipe?dish=${encodeURIComponent(dish)}`);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}: Failed to reach AI endpoint`);
+      }
+
       const data = await res.json();
+      if (!data.ingredients || !Array.isArray(data.ingredients)) {
+        throw new Error(data.error || "Worker response did not include a valid ingredients array");
+      }
       
       let html = `<strong>Campout Grocery Staples for ${dish}:</strong><ul style="margin:4px 0; padding-left:20px;">`;
       data.ingredients.forEach(ing => {
-        html += `<li>${ing} <button style="padding:2px 6px; font-size:0.75rem; margin-left:8px;" onclick="quickSearch('${mealId}', '${ing}')">Find at Walmart</button></li>`;
+        const cleanIng = ing.replace(/'/g, "\\'");
+        html += `<li>${ing} <button style="padding:2px 6px; font-size:0.75rem; margin-left:8px;" onclick="quickSearch('${mealId}', '${cleanIng}')">Find at Walmart</button></li>`;
       });
       html += `</ul>`;
       box.innerHTML = html;
     } catch (e) {
-  console.error("AI Fetch Error:", e);
-  box.innerHTML = `<span style="color:var(--danger)"><strong>Error:</strong> ${e.message}</span>`;
-}
+      console.error("AI Fetch Failure:", e);
+      box.innerHTML = `<span style="color:var(--danger)"><strong>Error:</strong> ${e.message}</span>`;
+    }
   }
 
   function quickSearch(mealId, term) {
@@ -246,6 +257,7 @@
     searchWalmart(mealId);
   }
 
+  // Call Cloudflare Worker Walmart Search Endpoint
   async function searchWalmart(mealId) {
     const query = document.getElementById(`search_${mealId}`).value.trim();
     const resBox = document.getElementById(`results_${mealId}`);
@@ -255,9 +267,15 @@
     resBox.innerHTML = `<em>Searching local Walmart inventory...</em>`;
 
     try {
-      const res = await fetch(`${PROXY_URL}/walmart?query=${encodeURIComponent(query)}`);
-      const data = await res.json();
+      const cleanProxy = PROXY_URL.replace(/\/+$/, "");
+      const res = await fetch(`${cleanProxy}/walmart?query=${encodeURIComponent(query)}`);
+      
+      if (!res.ok) {
+        const errorData = await res.json().catch(() => ({}));
+        throw new Error(errorData.error || `HTTP ${res.status}: Store query failed`);
+      }
 
+      const data = await res.json();
       if (!data.items || data.items.length === 0) {
         resBox.innerHTML = `No priced items found. Try refining search keywords.`;
         return;
@@ -285,7 +303,8 @@
       html += `</div>`;
       resBox.innerHTML = html;
     } catch (e) {
-      resBox.innerHTML = `<span style="color:var(--danger)">Failed to query Walmart search proxy.</span>`;
+      console.error("Walmart Fetch Failure:", e);
+      resBox.innerHTML = `<span style="color:var(--danger)"><strong>Error:</strong> ${e.message}</span>`;
     }
   }
 
@@ -353,6 +372,7 @@
     document.getElementById("overBudgetWarn").style.display = totalSpent > totalBudget ? "block" : "none";
   }
 
+  // Export Roster & Shopping List to Google Doc via Apps Script
   async function exportToGoogleDoc() {
     const patrol = document.getElementById("patrolName").value.trim() || "Patrol";
     const scouts = document.getElementById("scoutCount").value;
