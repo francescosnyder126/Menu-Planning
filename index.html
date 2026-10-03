@@ -121,16 +121,17 @@
   <div class="card">
     <div class="grid">
       <div>
-        <label for="patrolSelect">Patrol Name</label>
-        <select id="patrolSelect" onchange="renderMealPlan()">
-          <option value="Pirate Patrol">Pirate Patrol</option>
-          <option value="Barbarian Patrol">Barbarian Patrol</option>
-          <option value="Anaconda Patrol">Anaconda Patrol</option>
-          <option value="Pheonix Patrol">Pheonix Patrol</option>
-          <option value="Spartan Patrol">Spartan Patrol</option>
-          <option value="Osprey Patrol">Osprey Patrol</option>
-        </select>
-      </div>
+  <label for="patrolSelect">Patrol Name</label>
+  <input type="text" id="patrolSelect" list="patrolList" placeholder="Select or type patrol name..." value="Fox Patrol">
+  <datalist id="patrolList">
+      <option value="Pirate Patrol">Pirate Patrol</option>
+      <option value="Barbarian Patrol">Barbarian Patrol</option>
+      <option value="Anaconda Patrol">Anaconda Patrol</option>
+      <option value="Pheonix Patrol">Pheonix Patrol</option>
+      <option value="Spartan Patrol">Spartan Patrol</option>
+      <option value="Osprey Patrol">Osprey Patrol</option>
+  </datalist>
+</div>  
       <div>
         <label for="scoutCount">Attending Scouts</label>
         <input type="number" id="scoutCount" min="1" max="15" value="6" onchange="updateCalculations()">
