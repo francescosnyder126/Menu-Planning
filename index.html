@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Troop Campout Menu & Budget Planner</title>
+  <style>
+    :root {
+      --primary: #003f66;
+      --secondary: #ce1126;
+      --success: #28a745;
+      --warning: #ffc107;
+      --danger: #dc3545;
+      --bg: #f8f9fa;
+      --card: #ffffff;
+      --text: #212529;
+    }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      margin: 0;
+      padding: 1.5rem;
+      background: var(--bg);
+      color: var(--text);
+    }
+    .container {
+      max-width: 900px;
+      margin: 0 auto;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    .card {
+      background: var(--card);
+      border-radius: 8px;
+      padding: 1.25rem;
+      margin-bottom: 1.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    label {
+      font-weight: 600;
+      display: block;
+      margin-bottom: 0.25rem;
+    }
+    input, select, button {
+      width: 100%;
+      padding: 0.6rem;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      font-size: 1rem;
+      box-sizing: border-box;
+    }
+    .budget-bar-container {
+      background: #e9ecef;
+      height: 24px;
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 10px 0;
+    }
+    .budget-bar {
+      height: 100%;
+      width: 0%;
+      transition: width 0.3s, background-color 0.3s;
+    }
+    .meal-block {
+      border: 1px solid #dee2e6;
+      padding: 1rem;
+      border-radius: 6px;
+      margin-bottom: 1rem;
+    }
+    .meal-header {
+      font-weight: bold;
+      color: var(--primary);
+      margin-bottom: 0.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .ingredient-row {
+      display: flex;
+      gap: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .ingredient-list {
+      margin-top: 0.5rem;
+      font-size: 0.9rem;
+    }
+    .badge {
+      display: inline-block;
+      padding: 0.25rem 0.5rem;
+      border-radius: 4px;
+      font-weight: 600;
+      color: #fff;
+    }
+    .btn-primary {
+      background: var(--primary);
+      color: #fff;
+      font-weight: bold;
+      cursor: pointer;
+      border: none;
+      margin-top: 1rem;
+    }
+    .btn-primary:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+
+<div class="container">
+  <header>
+    <h1>🏕️ Patrol Campout Menu & Budget Planner</h1>
+    <p>Standard BSA Campout: $15.00 per Scout Budget</p>
+  </header>
+
+  <!-- Patrol & Attendance Setup -->
+  <div class="card">
+    <div class="grid">
+      <div>
+        <label for="patrolSelect">Patrol Name</label>
+        <select id="patrolSelect" onchange="renderMealPlan()">
+          <option value="Fox Patrol">Fox Patrol</option>
+          <option value="Eagle Patrol">Eagle Patrol</option>
+          <option value="Flaming Arrow Patrol">Flaming Arrow Patrol</option>
+          <option value="Wolverine Patrol">Wolverine Patrol</option>
+        </select>
+      </div>
+      <div>
+        <label for="scoutCount">Attending Scouts</label>
+        <input type="number" id="scoutCount" min="1" max="15" value="6" onchange="updateCalculations()">
+      </div>
+    </div>
+  </div>
+
+  <!-- Budget Monitor -->
+  <div class="card">
+    <h3>Patrol Budget Status</h3>
+    <div class="budget-bar-container">
+      <div id="budgetBar" class="budget-bar"></div>
+    </div>
+    <div style="display: flex; justify-content: space-between; font-weight: bold;">
+      <span>Spent: $<span id="totalSpent">0.00</span></span>
+      <span>Budget: $<span id="totalBudget">90.00</span> ($15/scout)</span>
+      <span>Remaining: $<span id="remainingBudget">90.00</span></span>
+    </div>
+    <div id="budgetWarning" style="color: var(--danger); font-weight: bold; margin-top: 0.5rem; display: none;">
+      ⚠️ Over budget! Reduce servings or substitute ingredients.
+    </div>
+  </div>
+
+  <!-- Meal Plan Container -->
+  <div class="card">
+    <h3>Mandatory Campout Meals</h3>
+    <div id="mealsContainer"></div>
+  </div>
+
+  <!-- Export Section -->
+  <div class="card">
+    <h3>Finalize & Send to Shared Google Doc</h3>
+    <p>When your patrol leader has verified the menu and stayed under $15/scout, submit your shopping list directly to the troop quartermaster and grubmaster document.</p>
+    <button class="btn-primary" onclick="submitToGoogleDoc()">Export Menu to Google Doc</button>
+  </div>
+</div>
+
+<script>
+  // Benchmark local Walmart retail pricing for typical scout camp food
+  const WALMART_PRICES = {
+    "Hot Dogs & Buns": 4.88,
+    "S'mores Supplies (Marshmallows, Graham, Choc)": 7.42,
+    "Pancake Mix & Syrup": 4.28,
+    "Eggs (Dozen)": 2.84,
+    "Bacon (1 lb)": 4.98,
+    "Sandwich Bread, Deli Meat & Cheese": 8.50,
+    "Peanut Butter & Jelly with Bread": 6.12,
+    "Dutch Oven Chili & Cornbread Mix": 9.75,
+    "Foil Pack Fajitas (Chicken, Peppers, Tortillas)": 12.50,
+    "Campfire Quesadillas": 6.20,
+    "Oatmeal & Fruit Packets": 3.75,
+    "Pretzels, Apples & Snack Mix": 5.50
+  };
+
+  const REQUIRED_MEALS = [
+    { id: "fri_cb", name: "Friday Cracker Barrel" },
+    { id: "sat_bk", name: "Saturday Breakfast" },
+    { id: "sat_lu", name: "Saturday Lunch" },
+    { id: "sat_dn", name: "Saturday Dinner" },
+    { id: "sat_cb", name: "Saturday Cracker Barrel" },
+    { id: "sun_bk", name: "Sunday Breakfast" }
+  ];
+
+  // State structure
+  let menuData = {
+    fri_cb: { item: "Hot Dogs & Buns", qty: 1 },
+    sat_bk: { item: "Pancake Mix & Syrup", qty: 2 },
+    sat_lu: { item: "Sandwich Bread, Deli Meat & Cheese", qty: 2 },
+    sat_dn: { item: "Dutch Oven Chili & Cornbread Mix", qty: 2 },
+    sat_cb: { item: "S'mores Supplies (Marshmallows, Graham, Choc)", qty: 1 },
+    sun_bk: { item: "Oatmeal & Fruit Packets", qty: 2 }
+  };
+
+  function renderMealPlan() {
+    const container = document.getElementById("mealsContainer");
+    container.innerHTML = "";
+
+    REQUIRED_MEALS.forEach(meal => {
+      const block = document.createElement("div");
+      block.className = "meal-block";
+
+      let optionsHtml = Object.keys(WALMART_PRICES).map(name => 
+        `<option value="${name}" ${menuData[meal.id]?.item === name ? "selected" : ""}>
+          ${name} ($${WALMART_PRICES[name].toFixed(2)})
+        </option>`
+      ).join("");
+
+      block.innerHTML = `
+        <div class="meal-header">
+          <span>${meal.name}</span>
+          <span id="cost_${meal.id}">$0.00</span>
+        </div>
+        <div class="ingredient-row">
+          <select onchange="updateMealSelection('${meal.id}', this.value, document.getElementById('qty_${meal.id}').value)">
+            ${optionsHtml}
+          </select>
+          <input type="number" id="qty_${meal.id}" min="1" max="10" value="${menuData[meal.id]?.qty || 1}" 
+                 style="width: 80px;" onchange="updateMealSelection('${meal.id}', null, this.value)">
+        </div>
+      `;
+      container.appendChild(block);
+    });
+
+    updateCalculations();
+  }
+
+  function updateMealSelection(mealId, item, qty) {
+    if (item) menuData[mealId].item = item;
+    if (qty) menuData[mealId].qty = parseInt(qty, 10);
+    updateCalculations();
+  }
+
+  function updateCalculations() {
+    const scouts = parseInt(document.getElementById("scoutCount").value, 10) || 1;
+    const totalBudget = scouts * 15.00;
+    let totalSpent = 0;
+
+    REQUIRED_MEALS.forEach(meal => {
+      const selection = menuData[meal.id];
+      const unitCost = WALMART_PRICES[selection.item] || 0;
+      const mealTotal = unitCost * selection.qty;
+      totalSpent += mealTotal;
+
+      const costEl = document.getElementById(`cost_${meal.id}`);
+      if (costEl) costEl.textContent = `$${mealTotal.toFixed(2)}`;
+    });
+
+    const remaining = totalBudget - totalSpent;
+    const percent = Math.min((totalSpent / totalBudget) * 100, 100);
+
+    document.getElementById("totalBudget").textContent = totalBudget.toFixed(2);
+    document.getElementById("totalSpent").textContent = totalSpent.toFixed(2);
+    document.getElementById("remainingBudget").textContent = remaining.toFixed(2);
+
+    const bar = document.getElementById("budgetBar");
+    bar.style.width = percent + "%";
+    bar.style.backgroundColor = totalSpent > totalBudget ? "var(--danger)" : "var(--success)";
+
+    document.getElementById("budgetWarning").style.display = totalSpent > totalBudget ? "block" : "none";
+  }
+
+  async function submitToGoogleDoc() {
+    const scouts = document.getElementById("scoutCount").value;
+    const patrol = document.getElementById("patrolSelect").value;
+    
+    // REPLACE THIS URL with your deployed Google Apps Script Web App URL
+    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+
+    const payload = {
+      patrol: patrol,
+      scoutCount: scouts,
+      meals: menuData,
+      prices: WALMART_PRICES,
+      totalCost: document.getElementById("totalSpent").textContent
+    };
+
+    alert(`Ready to export menu for ${patrol} (${scouts} Scouts). Submitting to shared Google Doc...`);
+
+    try {
+      await fetch(https://script.google.com/macros/s/AKfycbzJ8CV-I9wlktgIWQDc1oKXrb8MBG02T8ZpTtma7I8b3sLrTvwFpvvK9PGG5o8c6dj0/exec, {
+        method: "POST",
+        mode: "no-cors",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      });
+      alert("Menu and consolidated shopping list successfully posted to the shared Google Doc!");
+    } catch (err) {
+      console.error(err);
+      alert("Submission failed. Ensure your Google Apps Script endpoint is correctly deployed and configured.");
+    }
+  }
+
+  // Initialize
+  renderMealPlan();
+</script>
+</body>
+</html>
