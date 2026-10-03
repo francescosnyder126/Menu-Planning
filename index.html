@@ -141,12 +141,26 @@
         throw new Error("Invalid response from Worker");
       }
 
-      // Populate meal ingredients
-      mealData[mealId].ingredients = data.ingredients;
+      // Format ingredients safely whether the worker returns objects {qty, item} or plain strings
+      mealData[mealId].ingredients = data.ingredients.map(ing => {
+        if (typeof ing === "object" && ing !== null) {
+          return {
+            qty: Math.max(1, parseInt(ing.qty, 10) || 1),
+            item: String(ing.item || "Grocery item")
+          };
+        } else {
+          return {
+            qty: 1,
+            item: String(ing || "Grocery item")
+          };
+        }
+      });
+
       renderIngredients(mealId);
       statusBox.textContent = `Generated items sized for ${scouts} scouts.`;
       statusBox.style.color = "var(--success)";
     } catch (e) {
+      console.error(e);
       statusBox.textContent = `Error: ${e.message}`;
       statusBox.style.color = "var(--danger)";
     }
