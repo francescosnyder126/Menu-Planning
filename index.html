@@ -236,8 +236,9 @@
       html += `</ul>`;
       box.innerHTML = html;
     } catch (e) {
-      box.innerHTML = `<span style="color:var(--danger)">Unable to load AI suggestions.</span>`;
-    }
+  console.error("AI Fetch Error:", e);
+  box.innerHTML = `<span style="color:var(--danger)"><strong>Error:</strong> ${e.message}</span>`;
+}
   }
 
   function quickSearch(mealId, term) {
