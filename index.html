@@ -3,188 +3,86 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Troop Campout Menu & Budget Planner</title>
+  <title>Scout Campout Meal Planner & Walmart Live Pricing</title>
   <style>
     :root {
       --primary: #003f66;
       --secondary: #ce1126;
       --success: #28a745;
-      --warning: #ffc107;
       --danger: #dc3545;
-      --bg: #f8f9fa;
+      --bg: #f4f6f9;
       --card: #ffffff;
-      --text: #212529;
+      --border: #dee2e6;
     }
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      margin: 0;
-      padding: 1.5rem;
-      background: var(--bg);
-      color: var(--text);
+      margin: 0; padding: 1.5rem; background: var(--bg); color: #212529;
     }
-    .container {
-      max-width: 900px;
-      margin: 0 auto;
-    }
-    header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    .card {
-      background: var(--card);
-      border-radius: 8px;
-      padding: 1.25rem;
-      margin-bottom: 1.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.08);
-    }
-    .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    label {
-      font-weight: 600;
-      display: block;
-      margin-bottom: 0.25rem;
-    }
-    input, select, button {
-      width: 100%;
-      padding: 0.6rem;
-      border: 1px solid #ccc;
-      border-radius: 4px;
-      font-size: 1rem;
-      box-sizing: border-box;
-    }
-    .budget-bar-container {
-      background: #e9ecef;
-      height: 24px;
-      border-radius: 12px;
-      overflow: hidden;
-      margin: 10px 0;
-    }
-    .budget-bar {
-      height: 100%;
-      width: 0%;
-      transition: width 0.3s, background-color 0.3s;
-    }
-    .meal-block {
-      border: 1px solid #dee2e6;
-      padding: 1rem;
-      border-radius: 6px;
-      margin-bottom: 1rem;
-    }
-    .meal-header {
-      font-weight: bold;
-      color: var(--primary);
-      margin-bottom: 0.5rem;
-      display: flex;
-      justify-content: space-between;
-    }
-    .ingredient-row {
-      display: flex;
-      gap: 0.5rem;
-      margin-top: 0.5rem;
-    }
-    .ingredient-list {
-      margin-top: 0.5rem;
-      font-size: 0.9rem;
-    }
-    .badge {
-      display: inline-block;
-      padding: 0.25rem 0.5rem;
-      border-radius: 4px;
-      font-weight: 600;
-      color: #fff;
-    }
-    .btn-primary {
-      background: var(--primary);
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      border: none;
-      margin-top: 1rem;
-    }
-    .btn-primary:hover {
-      opacity: 0.9;
-    }
+    .container { max-width: 960px; margin: 0 auto; }
+    .card { background: var(--card); border-radius: 8px; padding: 1.25rem; margin-bottom: 1.25rem; box-shadow: 0 2px 4px rgba(0,0,0,0.06); }
+    .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+    label { font-weight: bold; font-size: 0.9rem; margin-bottom: 0.25rem; display: block; }
+    input, button, select { padding: 0.6rem; border: 1px solid var(--border); border-radius: 4px; box-sizing: border-box; }
+    button { cursor: pointer; background: var(--primary); color: white; border: none; font-weight: 600; }
+    button:hover { opacity: 0.9; }
+    .btn-secondary { background: #6c757d; }
+    .btn-ai { background: #5a2d82; }
+    .btn-danger { background: var(--danger); padding: 0.3rem 0.6rem; font-size: 0.8rem; }
+    .budget-bar-container { background: #e9ecef; height: 22px; border-radius: 11px; overflow: hidden; margin: 10px 0; }
+    .budget-bar { height: 100%; width: 0%; transition: width 0.3s, background-color 0.3s; }
+    .meal-card { border-left: 5px solid var(--primary); margin-bottom: 1.25rem; }
+    .meal-title-row { display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #eee; padding-bottom: 0.5rem; margin-bottom: 0.75rem; }
+    .ingredient-table { width: 100%; border-collapse: collapse; margin-top: 0.5rem; font-size: 0.9rem; }
+    .ingredient-table th, .ingredient-table td { padding: 6px 8px; text-align: left; border-bottom: 1px solid #eee; }
+    .ai-box { background: #fdf7ff; border: 1px dashed #b197fc; padding: 0.75rem; border-radius: 6px; margin: 0.5rem 0; }
+    .walmart-search-box { background: #f0f7ff; border: 1px dashed #74c0fc; padding: 0.75rem; border-radius: 6px; margin-top: 0.5rem; }
   </style>
 </head>
 <body>
 
 <div class="container">
-  <header>
-    <h1>🏕️ Patrol Campout Menu & Budget Planner</h1>
-    <p>Standard BSA Campout: $15.00 per Scout Budget</p>
-  </header>
-
-  <!-- Patrol & Attendance Setup -->
   <div class="card">
+    <h2 style="margin-top:0;">🏕️ Patrol Campout Menu & Live Walmart Budgeter</h2>
     <div class="grid">
       <div>
-  <label for="patrolSelect">Patrol Name</label>
-  <input type="text" id="patrolSelect" list="patrolList" placeholder="Select or type patrol name..." value="Fox Patrol">
-  <datalist id="patrolList">
-      <option value="Pirate Patrol">Pirate Patrol</option>
-      <option value="Barbarian Patrol">Barbarian Patrol</option>
-      <option value="Anaconda Patrol">Anaconda Patrol</option>
-      <option value="Pheonix Patrol">Pheonix Patrol</option>
-      <option value="Spartan Patrol">Spartan Patrol</option>
-      <option value="Osprey Patrol">Osprey Patrol</option>
-  </datalist>
-</div>  
+        <label>Patrol Name</label>
+        <input type="text" id="patrolName" placeholder="e.g., Eagle Patrol" value="Eagle Patrol">
+      </div>
       <div>
-        <label for="scoutCount">Attending Scouts</label>
-        <input type="number" id="scoutCount" min="1" max="15" value="6" onchange="updateCalculations()">
+        <label>Attending Scouts</label>
+        <input type="number" id="scoutCount" min="1" max="15" value="6" oninput="updateBudgetSummary()">
       </div>
     </div>
   </div>
 
-  <!-- Budget Monitor -->
+  <!-- Budget Bar -->
   <div class="card">
-    <h3>Patrol Budget Status</h3>
+    <div style="display:flex; justify-content:space-between; font-weight:bold;">
+      <span>Budget Used: $<span id="spentTotal">0.00</span></span>
+      <span>Allowance: $<span id="budgetTotal">90.00</span> ($15/Scout)</span>
+      <span>Remaining: $<span id="remainingTotal">90.00</span></span>
+    </div>
     <div class="budget-bar-container">
       <div id="budgetBar" class="budget-bar"></div>
     </div>
-    <div style="display: flex; justify-content: space-between; font-weight: bold;">
-      <span>Spent: $<span id="totalSpent">0.00</span></span>
-      <span>Budget: $<span id="totalBudget">90.00</span> ($15/scout)</span>
-      <span>Remaining: $<span id="remainingBudget">90.00</span></span>
-    </div>
-    <div id="budgetWarning" style="color: var(--danger); font-weight: bold; margin-top: 0.5rem; display: none;">
-      ⚠️ Over budget! Reduce servings or substitute ingredients.
+    <div id="overBudgetWarn" style="display:none; color:var(--danger); font-weight:bold; font-size:0.9rem;">
+      ⚠️ Over patrol allowance! Adjust quantities or swap ingredients.
     </div>
   </div>
 
-  <!-- Meal Plan Container -->
-  <div class="card">
-    <h3>Mandatory Campout Meals</h3>
-    <div id="mealsContainer"></div>
-  </div>
+  <!-- Meals Container -->
+  <div id="mealsContainer"></div>
 
-  <!-- Export Section -->
-  <div class="card">
-    <h3>Finalize & Send to Shared Google Doc</h3>
-    <p>When your patrol leader has verified the menu and stayed under $15/scout, submit your shopping list directly to the troop quartermaster and grubmaster document.</p>
-    <button class="btn-primary" onclick="submitToGoogleDoc()">Export Menu to Google Doc</button>
+  <!-- Export -->
+  <div class="card" style="text-align: center;">
+    <button style="padding: 0.8rem 2rem; font-size: 1.05rem;" onclick="exportToGoogleDoc()">📋 Export Roster & Shopping List to Google Doc</button>
   </div>
 </div>
 
 <script>
-  // Benchmark local Walmart retail pricing for typical scout camp food
-  const WALMART_PRICES = {
-    "Hot Dogs & Buns": 4.88,
-    "S'mores Supplies (Marshmallows, Graham, Choc)": 7.42,
-    "Pancake Mix & Syrup": 4.28,
-    "Eggs (Dozen)": 2.84,
-    "Bacon (1 lb)": 4.98,
-    "Sandwich Bread, Deli Meat & Cheese": 8.50,
-    "Peanut Butter & Jelly with Bread": 6.12,
-    "Dutch Oven Chili & Cornbread Mix": 9.75,
-    "Foil Pack Fajitas (Chicken, Peppers, Tortillas)": 12.50,
-    "Campfire Quesadillas": 6.20,
-    "Oatmeal & Fruit Packets": 3.75,
-    "Pretzels, Apples & Snack Mix": 5.50
-  };
+  // Cloudflare Worker Proxy URL & Google Apps Script URL
+  const PROXY_URL = "https://YOUR_CLOUDFLARE_WORKER.workers.dev";
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
 
   const REQUIRED_MEALS = [
     { id: "fri_cb", name: "Friday Cracker Barrel" },
@@ -195,117 +93,225 @@
     { id: "sun_bk", name: "Sunday Breakfast" }
   ];
 
-  // State structure
-  let menuData = {
-    fri_cb: { item: "Hot Dogs & Buns", qty: 1 },
-    sat_bk: { item: "Pancake Mix & Syrup", qty: 2 },
-    sat_lu: { item: "Sandwich Bread, Deli Meat & Cheese", qty: 2 },
-    sat_dn: { item: "Dutch Oven Chili & Cornbread Mix", qty: 2 },
-    sat_cb: { item: "S'mores Supplies (Marshmallows, Graham, Choc)", qty: 1 },
-    sun_bk: { item: "Oatmeal & Fruit Packets", qty: 2 }
+  // Meal state containing dish title and items
+  let mealData = {
+    fri_cb: { dish: "Hot Dogs & Cocoa", ingredients: [] },
+    sat_bk: { dish: "Pancakes & Bacon", ingredients: [] },
+    sat_lu: { dish: "Ham & Turkey Sandwiches", ingredients: [] },
+    sat_dn: { dish: "Dutch Oven Campfire Chili", ingredients: [] },
+    sat_cb: { dish: "Campfire S'mores", ingredients: [] },
+    sun_bk: { dish: "Instant Oatmeal & Fruit", ingredients: [] }
   };
 
-  function renderMealPlan() {
+  function initApp() {
     const container = document.getElementById("mealsContainer");
     container.innerHTML = "";
 
     REQUIRED_MEALS.forEach(meal => {
-      const block = document.createElement("div");
-      block.className = "meal-block";
-
-      let optionsHtml = Object.keys(WALMART_PRICES).map(name => 
-        `<option value="${name}" ${menuData[meal.id]?.item === name ? "selected" : ""}>
-          ${name} ($${WALMART_PRICES[name].toFixed(2)})
-        </option>`
-      ).join("");
-
-      block.innerHTML = `
-        <div class="meal-header">
-          <span>${meal.name}</span>
-          <span id="cost_${meal.id}">$0.00</span>
+      const card = document.createElement("div");
+      card.className = "card meal-card";
+      card.innerHTML = `
+        <div class="meal-title-row">
+          <h3 style="margin:0;">${meal.name}</h3>
+          <span style="font-weight:bold;" id="cost_${meal.id}">$0.00</span>
         </div>
-        <div class="ingredient-row">
-          <select onchange="updateMealSelection('${meal.id}', this.value, document.getElementById('qty_${meal.id}').value)">
-            ${optionsHtml}
-          </select>
-          <input type="number" id="qty_${meal.id}" min="1" max="10" value="${menuData[meal.id]?.qty || 1}" 
-                 style="width: 80px;" onchange="updateMealSelection('${meal.id}', null, this.value)">
+        
+        <label>Dish Description</label>
+        <div style="display: flex; gap: 0.5rem; margin-bottom: 0.5rem;">
+          <input type="text" id="dish_${meal.id}" value="${mealData[meal.id].dish}" placeholder="e.g. Dutch Oven Beef Stew" 
+                 onchange="mealData['${meal.id}'].dish = this.value">
+          <button class="btn-ai" onclick="aiSuggestIngredients('${meal.id}')">🤖 AI Suggest Ingredients</button>
+        </div>
+
+        <div id="ai_suggestions_${meal.id}" class="ai-box" style="display:none;"></div>
+
+        <!-- Ingredient List Table -->
+        <table class="ingredient-table" id="table_${meal.id}">
+          <thead>
+            <tr>
+              <th>Ingredient / Walmart Item</th>
+              <th style="width:70px;">Qty</th>
+              <th style="width:80px;">Unit $</th>
+              <th style="width:80px;">Total</th>
+              <th style="width:40px;"></th>
+            </tr>
+          </thead>
+          <tbody id="tbody_${meal.id}"></tbody>
+        </table>
+
+        <!-- Live Walmart Search -->
+        <div class="walmart-search-box">
+          <label style="font-size:0.85rem;">🔍 Search & Add Live Walmart Items to this Meal</label>
+          <div style="display:flex; gap:0.5rem;">
+            <input type="text" id="search_${meal.id}" placeholder="e.g. Great Value ground beef, shredded cheddar">
+            <button onclick="searchWalmart('${meal.id}')" style="width:100px;">Search</button>
+          </div>
+          <div id="results_${meal.id}" style="margin-top:0.5rem; font-size:0.85rem;"></div>
         </div>
       `;
-      container.appendChild(block);
+      container.appendChild(card);
     });
 
-    updateCalculations();
+    updateBudgetSummary();
   }
 
-  function updateMealSelection(mealId, item, qty) {
-    if (item) menuData[mealId].item = item;
-    if (qty) menuData[mealId].qty = parseInt(qty, 10);
-    updateCalculations();
+  // AI Ingredient Recommender (calls Cloudflare Worker AI endpoint)
+  async function aiSuggestIngredients(mealId) {
+    const dish = document.getElementById(`dish_${mealId}`).value.trim();
+    const box = document.getElementById(`ai_suggestions_${mealId}`);
+    if (!dish) { alert("Please type a dish description first!"); return; }
+
+    box.style.display = "block";
+    box.innerHTML = `<em>Generating recommended ingredient list for "${dish}"...</em>`;
+
+    try {
+      const res = await fetch(`${PROXY_URL}/ai-recipe?dish=${encodeURIComponent(dish)}`);
+      const data = await res.json();
+      
+      let html = `<strong>AI Suggestions for ${dish}:</strong><ul style="margin:4px 0; padding-left:20px;">`;
+      data.ingredients.forEach(ing => {
+        html += `<li>${ing} <button style="padding:2px 6px; font-size:0.75rem; margin-left:8px;" onclick="quickSearch('${mealId}', '${ing}')">Find at Walmart</button></li>`;
+      });
+      html += `</ul>`;
+      box.innerHTML = html;
+    } catch (e) {
+      box.innerHTML = `<span style="color:var(--danger)">Unable to load AI suggestions. Check your Worker endpoint.</span>`;
+    }
   }
 
-  function updateCalculations() {
+  function quickSearch(mealId, term) {
+    document.getElementById(`search_${mealId}`).value = term;
+    searchWalmart(mealId);
+  }
+
+  // Live Walmart Item Search via Cloudflare Worker
+  async function searchWalmart(mealId) {
+    const query = document.getElementById(`search_${mealId}`).value.trim();
+    const resBox = document.getElementById(`results_${mealId}`);
+    if (!query) return;
+
+    resBox.innerHTML = `<em>Searching Walmart nearby...</em>`;
+
+    try {
+      const res = await fetch(`${PROXY_URL}/walmart?query=${encodeURIComponent(query)}`);
+      const data = await res.json();
+
+      if (!data.items || data.items.length === 0) {
+        resBox.innerHTML = `No priced items found. Try refining your keywords.`;
+        return;
+      }
+
+      let html = `<div style="max-height:160px; overflow-y:auto; border:1px solid #ddd; background:#fff; padding:6px;">`;
+      data.items.slice(0, 6).forEach(item => {
+        const cleanTitle = item.title.replace(/'/g, "\\'");
+        html += `
+          <div style="display:flex; justify-content:space-between; align-items:center; padding:4px 0; border-bottom:1px solid #eee;">
+            <span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap; max-width:65%;">${item.title}</span>
+            <div>
+              <strong style="margin-right:8px;">$${item.price.toFixed(2)}</strong>
+              <button style="padding:2px 8px; font-size:0.8rem;" onclick="addIngredient('${mealId}', '${cleanTitle}', ${item.price})">+ Add</button>
+            </div>
+          </div>`;
+      });
+      html += `</div>`;
+      resBox.innerHTML = html;
+    } catch (e) {
+      resBox.innerHTML = `<span style="color:var(--danger)">Failed to query Walmart search proxy.</span>`;
+    }
+  }
+
+  function addIngredient(mealId, name, price) {
+    mealData[mealId].ingredients.push({ name: name, price: price, qty: 1 });
+    renderIngredients(mealId);
+    updateBudgetSummary();
+  }
+
+  function removeIngredient(mealId, index) {
+    mealData[mealId].ingredients.splice(index, 1);
+    renderIngredients(mealId);
+    updateBudgetSummary();
+  }
+
+  function updateQty(mealId, index, newQty) {
+    mealData[mealId].ingredients[index].qty = Math.max(1, parseInt(newQty, 10) || 1);
+    renderIngredients(mealId);
+    updateBudgetSummary();
+  }
+
+  function renderIngredients(mealId) {
+    const tbody = document.getElementById(`tbody_${mealId}`);
+    tbody.innerHTML = "";
+    let mealCost = 0;
+
+    mealData[mealId].ingredients.forEach((ing, i) => {
+      const subtotal = ing.price * ing.qty;
+      mealCost += subtotal;
+      const row = document.createElement("tr");
+      row.innerHTML = `
+        <td>${ing.name}</td>
+        <td><input type="number" min="1" value="${ing.qty}" style="width:50px; padding:2px;" onchange="updateQty('${mealId}', ${i}, this.value)"></td>
+        <td>$${ing.price.toFixed(2)}</td>
+        <td>$${subtotal.toFixed(2)}</td>
+        <td><button class="btn-danger" onclick="removeIngredient('${mealId}', ${i})">✕</button></td>
+      `;
+      tbody.appendChild(row);
+    });
+
+    document.getElementById(`cost_${mealId}`).textContent = `$${mealCost.toFixed(2)}`;
+  }
+
+  function updateBudgetSummary() {
     const scouts = parseInt(document.getElementById("scoutCount").value, 10) || 1;
     const totalBudget = scouts * 15.00;
     let totalSpent = 0;
 
     REQUIRED_MEALS.forEach(meal => {
-      const selection = menuData[meal.id];
-      const unitCost = WALMART_PRICES[selection.item] || 0;
-      const mealTotal = unitCost * selection.qty;
-      totalSpent += mealTotal;
-
-      const costEl = document.getElementById(`cost_${meal.id}`);
-      if (costEl) costEl.textContent = `$${mealTotal.toFixed(2)}`;
+      mealData[meal.id].ingredients.forEach(ing => {
+        totalSpent += ing.price * ing.qty;
+      });
     });
 
     const remaining = totalBudget - totalSpent;
-    const percent = Math.min((totalSpent / totalBudget) * 100, 100);
+    const pct = Math.min((totalSpent / totalBudget) * 100, 100);
 
-    document.getElementById("totalBudget").textContent = totalBudget.toFixed(2);
-    document.getElementById("totalSpent").textContent = totalSpent.toFixed(2);
-    document.getElementById("remainingBudget").textContent = remaining.toFixed(2);
+    document.getElementById("budgetTotal").textContent = totalBudget.toFixed(2);
+    document.getElementById("spentTotal").textContent = totalSpent.toFixed(2);
+    document.getElementById("remainingTotal").textContent = remaining.toFixed(2);
 
     const bar = document.getElementById("budgetBar");
-    bar.style.width = percent + "%";
+    bar.style.width = pct + "%";
     bar.style.backgroundColor = totalSpent > totalBudget ? "var(--danger)" : "var(--success)";
-
-    document.getElementById("budgetWarning").style.display = totalSpent > totalBudget ? "block" : "none";
+    document.getElementById("overBudgetWarn").style.display = totalSpent > totalBudget ? "block" : "none";
   }
 
-  async function submitToGoogleDoc() {
+  async function exportToGoogleDoc() {
+    const patrol = document.getElementById("patrolName").value.trim() || "Patrol";
     const scouts = document.getElementById("scoutCount").value;
-    const patrol = document.getElementById("patrolSelect").value;
-    
-    // REPLACE THIS URL with your deployed Google Apps Script Web App URL
-    const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+    const totalSpent = document.getElementById("spentTotal").textContent;
 
     const payload = {
       patrol: patrol,
       scoutCount: scouts,
-      meals: menuData,
-      prices: WALMART_PRICES,
-      totalCost: document.getElementById("totalSpent").textContent
+      totalCost: totalSpent,
+      meals: mealData
     };
 
-    alert(`Ready to export menu for ${patrol} (${scouts} Scouts). Submitting to shared Google Doc...`);
+    alert(`Submitting menu and consolidated shopping list for ${patrol}...`);
 
     try {
-      await fetch(https://script.google.com/macros/s/AKfycbzJ8CV-I9wlktgIWQDc1oKXrb8MBG02T8ZpTtma7I8b3sLrTvwFpvvK9PGG5o8c6dj0/exec, {
+      await fetch(APPS_SCRIPT_URL, {
         method: "POST",
         mode: "no-cors",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload)
       });
-      alert("Menu and consolidated shopping list successfully posted to the shared Google Doc!");
+      alert("Successfully posted to the shared Google Doc!");
     } catch (err) {
-      console.error(err);
-      alert("Submission failed. Ensure your Google Apps Script endpoint is correctly deployed and configured.");
+      alert("Error sending to Google Doc. Verify APPS_SCRIPT_URL.");
     }
   }
 
-  // Initialize
-  renderMealPlan();
+  window.onload = initApp;
 </script>
 </body>
 </html>
